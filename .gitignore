@@ -1,0 +1,12 @@
+*.txt
+*.svg
+*.jpeg
+*.dxf
+
+*.pdf
+*.NGC
+gcodes/
+Sublime text 2/
+UniversalGcodeSender/
+grbl-master/
+*.zip
