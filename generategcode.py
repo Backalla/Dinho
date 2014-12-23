@@ -74,7 +74,7 @@ def main():
       letter = 'space'
     if letter == '\n':
       cur_x=0
-      output_gcode_lines.append("\n\nG00 X0 Y-0.818\nG10 P0 L20 X0 Y0 Z0\n\n")
+      output_gcode_lines.append("\n\nG00 X0 Y-0.818\nG00 Z0\nG10 P0 L20 X0 Y0 Z0\n\n")
       continue
     # print letter
     letter_obj = open(os.path.join(letters_gcode_directory,letter)+'.ngc','r')
