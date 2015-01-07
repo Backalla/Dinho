@@ -1,6 +1,9 @@
 # Can write in next line now
 # But cannot go to next line if line ending is encountered.. Do it..
 
+letters_dict = {' ': 'space',',': 'comma',"'":"single_quote",'"':'double_quote','.':'period'}
+
+
 import sys
 import os
 import re
@@ -42,34 +45,33 @@ def main():
   letter_lengths = get_letter_lengths()
   # print letter_lengths
   outobj = open(outfile,'wa')
-  inobj = open(infile,'r')
-  file_contents = inobj.read()
-  words = file_contents.split()
+  # inobj = open(infile,'r')
+  file_contents = ""
   cur_x = 0
   cur_y = 0
-  # print words
-  # for calculating the width of each word to decide to go to the  next line
-  file_contents_2 = ""
-  word_length=0
-  for word in words:
-    word_length=0
-    for letter in word:
-      cur_x+=letter_lengths[letter][0]
-      word_length+=letter_lengths[letter][0]
-    # print word +" >> "+str(cur_x)+"  >>  word len = "+str(word_length)
-    if cur_x>page_width:
-      cur_x=word_length
-      file_contents_2+="\n"
-    cur_x+=letter_lengths['space'][0]
-    file_contents_2+=word+' '
-
+  word_length = 0
+  with open(infile,'r') as inobj:
+    for line in inobj:
+      cur_x=0
+      words=line.split()
+      for word in words:
+        word_length=0
+        for letter in word:
+          cur_x+=letter_lengths[letter][0]
+          word_length+=letter_lengths[letter][0]
+        if cur_x>page_width:
+          cur_x=word_length
+          file_contents+='\n'
+        cur_x+=letter_lengths['space'][0]
+        file_contents+=word+' '
+      file_contents+='\n'  
 
 
   cur_x=0
   # for compiling the gcode file
   output_gcode_lines = []
-  print file_contents_2
-  for letter in file_contents_2:
+  print file_contents
+  for letter in file_contents:
     if letter==' ':
       letter = 'space'
     if letter == '\n':
