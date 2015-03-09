@@ -1,7 +1,6 @@
-# Can write in next line now
-# But cannot go to next line if line ending is encountered.. Do it..
 
-letters_dict = {' ': 'space',',': 'comma',"'":"single_quote",'"':'double_quote','.':'period'}
+letters_dict = {' ': 'space',',': 'comma',"'":"single_quote",'"':'double_quote','.':'period','(':'open_round_bracket',
+  ')':'close_round_bracket',':':'colon','-':'hyphen',' ':'space'}
 
 
 import sys
@@ -11,7 +10,7 @@ import re
 page_width = 18
 page_height = 29
 # page_height is the number of lines..
-letters_gcode_directory = 'my'
+letters_gcode_directory = 'NewLetters'
 
 
 def get_letter_lengths():
@@ -32,31 +31,31 @@ def get_letter_lengths():
   return letter_lengths
 
 def main():
-  if len(sys.argv) != 3:
-    print "Usage: python generategcode.py [in file] [out file]"
+  if len(sys.argv) != 2:
+    print "Usage: python generategcode.py [in file]"
     return
 
   infile = sys.argv[1]
-  outfile = sys.argv[2]
   if not os.path.exists(infile):
     print "Filename %s does not exist." %infile
     return
-
   letter_lengths = get_letter_lengths()
   # print letter_lengths
-  outobj = open(outfile,'wa')
   # inobj = open(infile,'r')
   file_contents = ""
   cur_x = 0
   cur_y = 0
-  word_length = 0
+  wotrd_length = 0
   with open(infile,'r') as inobj:
     for line in inobj:
+
       cur_x=0
       words=line.split()
       for word in words:
         word_length=0
         for letter in word:
+          if letter in letters_dict:
+            letter = letters_dict[letter]
           cur_x+=letter_lengths[letter][0]
           word_length+=letter_lengths[letter][0]
         if cur_x>page_width:
@@ -64,21 +63,36 @@ def main():
           file_contents+='\n'
         cur_x+=letter_lengths['space'][0]
         file_contents+=word+' '
-      file_contents+='\n'  
+      file_contents+='\n'
 
-
+  pages=[]
   cur_x=0
+  output_line_num=0
   # for compiling the gcode file
   output_gcode_lines = []
-  print file_contents
+  line_num=0
+  for file_lines in file_contents.split('\n'):
+    print file_lines
+    line_num+=1
+    if line_num>28:
+      line_num=0
+      print '----------------------------'
+
+
   for letter in file_contents:
-    if letter==' ':
-      letter = 'space'
     if letter == '\n':
       cur_x=0
       output_gcode_lines.append("\n\nG00 X0 Y-0.818\nG00 Z0\nG10 P0 L20 X0 Y0 Z0\n\n")
+      output_line_num+=1
+      if output_line_num>28:
+        output_line_num=0
+        pages.append(output_gcode_lines)
+        output_gcode_lines=[]
       continue
     # print letter
+    if letter in letters_dict:
+      letter = letters_dict[letter]
+    # print letter,
     letter_obj = open(os.path.join(letters_gcode_directory,letter)+'.ngc','r')
     letter_gcode = letter_obj.read()
     match = re.search(r'%(.*)%',letter_gcode,re.DOTALL)
@@ -95,9 +109,14 @@ def main():
       output_gcode_lines.append(letter_gcode_line)
     cur_x += letter_lengths[letter][0]
     output_gcode_lines.append('\n\n')
-  for output_gcode_line in output_gcode_lines:
-    outobj.write(output_gcode_line)
-    outobj.write('\n')
+  page_num=1
+  for page in pages:
+    outfile=infile[:-4]+'_'+str(page_num)+'.ngc'
+    page_num+=1
+    outobj = open(outfile,'wa')
+    for output_gcode_line in page:
+      outobj.write(output_gcode_line)
+      outobj.write('\n')
 
 
 
