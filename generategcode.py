@@ -109,7 +109,9 @@ def main():
       output_gcode_lines.append(letter_gcode_line)
     cur_x += letter_lengths[letter][0]
     output_gcode_lines.append('\n\n')
+  pages.append(output_gcode_lines)
   page_num=1
+  print 'Number of pages: '+str(len(pages))
   for page in pages:
     outfile=infile[:-4]+'_'+str(page_num)+'.ngc'
     page_num+=1
